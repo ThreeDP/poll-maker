@@ -1,0 +1,80 @@
+version: '3'
+
+networks:
+  backend:
+
+secrets:
+  environment:
+    file: ./.env
+
+services:
+  # api:
+  #   container_name: api
+  #   image: node
+  #   build:
+  #     context: node
+  #   restart: always
+  #   ports:
+  #     - '5050:5050'
+  #   volumes:
+  #     - api-volume:/api
+  #   networks:
+  #     - backend
+  #   depends_on:
+  #     - db
+  
+  db:
+    container_name: db
+    image: postgres:16.1-alpine
+    restart: always
+    volumes:
+      - db-volume:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER}" 
+      POSTGRES_DB: "${POSTGRES_DB}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    ports:
+      - '5432:5432'
+    secrets:
+      - environment
+    networks:
+      - backend
+
+  redis:
+    container_name: redis
+    image: redis:6.2.14-alpine
+    environment:
+      ALLOW_EMPTY_PASSWORD: "${ALLOW_EMPTY_PASSWORD}"
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-volume:/var/lib/redis/data
+    networks:
+      - backend
+
+
+volumes:
+  api-volume:
+    name: api-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./requirements/node/api
+
+  redis-volume:
+    name: redis-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./requirements/redis/data
+  
+  db-volume:
+    name: db-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./requirements/db/data
+
