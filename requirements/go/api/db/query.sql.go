@@ -23,3 +23,15 @@ func (q *Queries) CreatePoll(ctx context.Context, arg CreatePollParams) error {
 	_, err := q.db.ExecContext(ctx, createPoll, arg.ID, arg.Title)
 	return err
 }
+
+const getPoll = `-- name: GetPoll :one
+SELECT title FROM poll
+WHERE id = $1
+`
+
+func (q *Queries) GetPoll(ctx context.Context, id string) (string, error) {
+	row := q.db.QueryRowContext(ctx, getPoll, id)
+	var title string
+	err := row.Scan(&title)
+	return title, err
+}

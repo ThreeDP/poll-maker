@@ -27,7 +27,7 @@ func CreatePollRequest(cG *gin.Context, dt IQueries, ctx context.Context) {
 		cG.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
 		return
 	}
-	cG.JSON(http.StatusOK, gin.H{
+	cG.JSON(http.StatusCreated, gin.H{
 		"id": reqBody.ID,
 	})
 }

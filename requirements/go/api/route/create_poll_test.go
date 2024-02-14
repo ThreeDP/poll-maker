@@ -6,32 +6,14 @@ import (
 	"net/http/httptest"
 	"testing"
 	"github.com/gin-gonic/gin"
-	"github.com/ThreeDP/poll-maker/db"
 	_ "github.com/lib/pq"
-	"database/sql"
 	"bytes"
 	"encoding/json"
 	"github.com/google/uuid"
-	"errors"
 )
 
-type TBody struct {
+type tBody struct {
 	Id string `json:"id"`
-}
-
-type TQueriesCreatePoll struct {
-	dbError bool
-}
-
-func (tq TQueriesCreatePoll) CreatePoll(ctx context.Context, dt db.CreatePollParams) error {
-	if tq.dbError == false {
-		return nil
-	}
-	return errors.New("error on insert poll")
-}
-
-func (tq TQueriesCreatePoll) WithTx(sql *sql.Tx) *db.Queries {
-	return &db.Queries{}
 }
 
 func TestCreatePoll(t *testing.T) {
@@ -40,17 +22,17 @@ func TestCreatePoll(t *testing.T) {
 	
 	t.Run("Test pass a correct Json Inform", func (t *testing.T) {
 		reqBody := `{"title": "Test Poll"}`
-		dt := TQueriesCreatePoll{dbError: false}
+		dt := TQueries{dbError: false}
 		w := httptest.NewRecorder() 
 		cG, _ := gin.CreateTestContext(w)
 		cG.Request = httptest.NewRequest(http.MethodPost, PollRoute, bytes.NewBuffer([]byte(reqBody)))
 		CreatePollRequest(cG, dt, ctx)
 
-		if w.Code != http.StatusOK {
-			t.Errorf("Expected Status [ 200 ], but has %d", w.Code)
+		if w.Code != http.StatusCreated {
+			t.Errorf("Expected Status [ 201 ], but has %d", w.Code)
 		}
 
-		var responseStruct TBody
+		var responseStruct tBody
 		if err := json.Unmarshal([]byte(w.Body.Bytes()), &responseStruct); err != nil {
 			t.Errorf("decode Error: %s", err)
 		}
@@ -63,26 +45,26 @@ func TestCreatePoll(t *testing.T) {
 
 	t.Run("Test don't pass title", func(t *testing.T) {
 		reqBody := `{}`
-		dt := TQueriesCreatePoll{dbError: false}
+		dt := TQueries{dbError: false}
 		w := httptest.NewRecorder() 
 		cG, _ := gin.CreateTestContext(w)
 		cG.Request = httptest.NewRequest(http.MethodPost, PollRoute, bytes.NewBuffer([]byte(reqBody)))
 		CreatePollRequest(cG, dt, ctx)
 		if w.Code != http.StatusBadRequest {
-			t.Errorf("Expected Status [ 200 ], but has %d", w.Code)
+			t.Errorf("Expected Status [ 400 ], but has %d", w.Code)
 		}
 	})
 
 	t.Run("Test BD error", func(t *testing.T) {
 		reqBody := `{"title": "Test Poll"}`
-		dt := TQueriesCreatePoll{dbError: true}
+		dt := TQueries{dbError: true}
 		w := httptest.NewRecorder() 
 		cG, _ := gin.CreateTestContext(w)
 		cG.Request = httptest.NewRequest(http.MethodPost, PollRoute, bytes.NewBuffer([]byte(reqBody)))
 		CreatePollRequest(cG, dt, ctx)
 
 		if w.Code != http.StatusInternalServerError {
-			t.Errorf("Expected Status [ 200 ], but has %d", w.Code)
+			t.Errorf("Expected Status [ 500 ], but has %d", w.Code)
 		}
 	})
 }

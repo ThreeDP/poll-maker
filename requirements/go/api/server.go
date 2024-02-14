@@ -30,6 +30,7 @@ func setupRouter() *gin.Engine {
 	})
 
 	r.GET("poll/:pollId", func(c *gin.Context) {
+		route.GetPollRequest(c, dt, ctx)
 	})
 
 	return r

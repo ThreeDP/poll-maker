@@ -9,5 +9,6 @@ import (
 
 type IQueries interface {
 	CreatePoll(context.Context, db.CreatePollParams) error
+	GetPoll(context.Context, string) (string, error)
 	WithTx(*sql.Tx) *db.Queries
 }
