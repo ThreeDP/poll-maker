@@ -2,9 +2,10 @@ package route
 
 import (
 	"net/http"
-	"github.com/google/uuid"
+
 	"github.com/ThreeDP/poll-maker/db"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type CreateUserBody struct {
@@ -12,8 +13,8 @@ type CreateUserBody struct {
 	Name string `json:"name" binding:"required"`
 	Surname string `json:"surname" binding:"required"`
 	Nickname string `json:"nickname" binding:"required"`
-	Email string `json:"email" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	Email string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=8"`
 }
 
 func CreateUserRequest(cG *gin.Context) {
@@ -25,7 +26,7 @@ func CreateUserRequest(cG *gin.Context) {
 	userBody.ID = uuid.New().String()
 	err := DBConnc.CreateUser(cG, db.CreateUserParams(userBody))
 	if err != nil {
-		cG.JSON(http.StatusBadRequest, gin.H{"error": err})
+		cG.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		return 
 	}
 	cG.JSON(http.StatusCreated, nil)
