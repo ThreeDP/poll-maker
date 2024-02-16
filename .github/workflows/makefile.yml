@@ -18,5 +18,5 @@ jobs:
       uses: actions/setup-go@v5.0.0
 
     - name: Run Test
-      run: make test
+      run: cd requirements/go/api/ && make test
           
