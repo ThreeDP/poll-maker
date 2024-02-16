@@ -24,6 +24,32 @@ func (q *Queries) CreatePoll(ctx context.Context, arg CreatePollParams) error {
 	return err
 }
 
+const createUser = `-- name: CreateUser :exec
+INSERT INTO Users(Id, Name, Surname, Nickname, Email, Password, CreateAt)
+VALUES($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)
+`
+
+type CreateUserParams struct {
+	ID       string
+	Name     string
+	Surname  string
+	Nickname string
+	Email    string
+	Password string
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
+	_, err := q.db.ExecContext(ctx, createUser,
+		arg.ID,
+		arg.Name,
+		arg.Surname,
+		arg.Nickname,
+		arg.Email,
+		arg.Password,
+	)
+	return err
+}
+
 const getPoll = `-- name: GetPoll :one
 SELECT title FROM poll
 WHERE id = $1

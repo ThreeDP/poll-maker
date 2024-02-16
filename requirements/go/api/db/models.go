@@ -5,20 +5,78 @@
 package db
 
 import (
+	"database/sql/driver"
+	"fmt"
 	"time"
 )
 
+type Statustype string
+
+const (
+	StatustypePending Statustype = "pending"
+	StatustypeFinish  Statustype = "finish"
+	StatustypeOpen    Statustype = "open"
+)
+
+func (e *Statustype) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = Statustype(s)
+	case string:
+		*e = Statustype(s)
+	default:
+		return fmt.Errorf("unsupported scan type for Statustype: %T", src)
+	}
+	return nil
+}
+
+type NullStatustype struct {
+	Statustype Statustype
+	Valid      bool // Valid is true if Statustype is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullStatustype) Scan(value interface{}) error {
+	if value == nil {
+		ns.Statustype, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.Statustype.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullStatustype) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.Statustype), nil
+}
+
 type Poll struct {
-	ID       string
-	Title    string
-	Createat time.Time
-	Updateat time.Time
+	ID          string
+	Title       string
+	Description string
+	Status      NullStatustype
+	Createat    time.Time
+	Updateat    time.Time
 }
 
 type Polloption struct {
 	ID     string
 	Title  string
 	Pollid string
+}
+
+type User struct {
+	ID       string
+	Name     string
+	Surname  string
+	Nickname string
+	Email    string
+	Password string
+	Image    []byte
+	Createat time.Time
 }
 
 type Vote struct {

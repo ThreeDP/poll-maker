@@ -1,7 +1,6 @@
 package route
 
 import (
-	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -18,15 +17,14 @@ type tBody struct {
 
 func TestCreatePoll(t *testing.T) {
 	gin.SetMode(gin.ReleaseMode)
-	ctx := context.Background()
+	DBConnc = TQueries{dbError: false}
 	
 	t.Run("Test pass a correct Json Inform", func (t *testing.T) {
 		reqBody := `{"title": "Test Poll"}`
-		dt := TQueries{dbError: false}
 		w := httptest.NewRecorder() 
 		cG, _ := gin.CreateTestContext(w)
-		cG.Request = httptest.NewRequest(http.MethodPost, PollRoute, bytes.NewBuffer([]byte(reqBody)))
-		CreatePollRequest(cG, dt, ctx)
+		cG.Request = httptest.NewRequest(http.MethodPost, "/poll/create", bytes.NewBuffer([]byte(reqBody)))
+		CreatePollRequest(cG)
 
 		if w.Code != http.StatusCreated {
 			t.Errorf("Expected Status [ 201 ], but has %d", w.Code)
@@ -45,23 +43,22 @@ func TestCreatePoll(t *testing.T) {
 
 	t.Run("Test don't pass title", func(t *testing.T) {
 		reqBody := `{}`
-		dt := TQueries{dbError: false}
 		w := httptest.NewRecorder() 
 		cG, _ := gin.CreateTestContext(w)
-		cG.Request = httptest.NewRequest(http.MethodPost, PollRoute, bytes.NewBuffer([]byte(reqBody)))
-		CreatePollRequest(cG, dt, ctx)
+		cG.Request = httptest.NewRequest(http.MethodPost, "/poll/create", bytes.NewBuffer([]byte(reqBody)))
+		CreatePollRequest(cG)
 		if w.Code != http.StatusBadRequest {
 			t.Errorf("Expected Status [ 400 ], but has %d", w.Code)
 		}
 	})
 
+	DBConnc = TQueries{dbError: true}
 	t.Run("Test BD error", func(t *testing.T) {
 		reqBody := `{"title": "Test Poll"}`
-		dt := TQueries{dbError: true}
 		w := httptest.NewRecorder() 
 		cG, _ := gin.CreateTestContext(w)
-		cG.Request = httptest.NewRequest(http.MethodPost, PollRoute, bytes.NewBuffer([]byte(reqBody)))
-		CreatePollRequest(cG, dt, ctx)
+		cG.Request = httptest.NewRequest(http.MethodPost, "/poll/create", bytes.NewBuffer([]byte(reqBody)))
+		CreatePollRequest(cG)
 
 		if w.Code != http.StatusInternalServerError {
 			t.Errorf("Expected Status [ 500 ], but has %d", w.Code)

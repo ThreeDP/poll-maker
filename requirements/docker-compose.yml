@@ -8,20 +8,25 @@ secrets:
     file: ./.env
 
 services:
-  # api:
-  #   container_name: api
-  #   image: node
-  #   build:
-  #     context: node
-  #   restart: always
-  #   ports:
-  #     - '5050:5050'
-  #   volumes:
-  #     - api-volume:/api
-  #   networks:
-  #     - backend
-  #   depends_on:
-  #     - db
+  api:
+    container_name: api
+    image: go
+    build:
+      context: ./go
+    restart: always
+    ports:
+      - '8080:8080'
+    environment:
+      DBUSER: "${POSTGRES_USER}" 
+      DBNAME: "${POSTGRES_DB}"
+      DBPASS: "${POSTGRES_PASSWORD}"
+      DBHOST: db
+    volumes:
+      - api-volume:/api
+    networks:
+      - backend
+    depends_on:
+      - db
   
   db:
     container_name: db
@@ -52,7 +57,6 @@ services:
     networks:
       - backend
 
-
 volumes:
   api-volume:
     name: api-volume
@@ -60,7 +64,7 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ./requirements/node/api
+      device: ./requirements/go/api
 
   redis-volume:
     name: redis-volume

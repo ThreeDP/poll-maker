@@ -1,7 +1,6 @@
 package route
 
 import (
-	"context"
 	_ "github.com/lib/pq"
 	"net/http"
 	"github.com/ThreeDP/poll-maker/db"
@@ -14,7 +13,7 @@ type body struct {
 	Title	string `json:"title" binding:"required"`
 }
 
-func CreatePollRequest(cG *gin.Context, dt IQueries, ctx context.Context) {
+func CreatePollRequest(cG *gin.Context) {
 	var reqBody body
 
 	if err := cG.ShouldBindJSON(&reqBody); err != nil {
@@ -22,7 +21,7 @@ func CreatePollRequest(cG *gin.Context, dt IQueries, ctx context.Context) {
 		return
 	}
 	reqBody.ID = uuid.New().String()
-	err := dt.CreatePoll(ctx, db.CreatePollParams(reqBody))
+	err := DBConnc.CreatePoll(cG, db.CreatePollParams(reqBody))
 	if err != nil {
 		cG.JSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
 		return
