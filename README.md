@@ -1,4 +1,6 @@
 # poll-maker
+[![Unit Tests](https://github.com/ThreeDP/poll-maker/actions/workflows/makefile.yml/badge.svg)](https://github.com/ThreeDP/poll-maker/actions/workflows/makefile.yml)
+
 This project is focused on developing a poll API.
 
 ## Config project
